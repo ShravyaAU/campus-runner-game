@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>No wifi Island Run 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="game-container">
+        
+        <!-- Registration / Start Screen -->
+        <div id="start-screen" class="screen active">
+            <h1 class="pixel-text glowing-text">No wifi Island Run 2026</h1>
+            
+            <div class="glass-panel">
+                <div class="input-group">
+                    <label for="player-name">ENTER PLAYER NAME</label>
+                    <input type="text" id="player-name" placeholder="E.g., Sparky" autocomplete="off" maxlength="15">
+                </div>
+
+                <div class="character-selection">
+                    <h3>CHOOSE YOUR CHARACTER</h3>
+                    <div class="character-grid">
+                        <div class="char-option selected" data-char="duck">🦆<span>Duck</span></div>
+                        <div class="char-option" data-char="dog">🐶<span>Dog</span></div>
+                        <div class="char-option" data-char="trex">🦖<span>T-Rex</span></div>
+                        <div class="char-option" data-char="turtle">🐢<span>Turtle</span></div>
+                        <div class="char-option" data-char="bunny">🐰<span>Bunny</span></div>
+                        <div class="char-option" data-char="horse">🐴<span>Horse</span></div>
+                        <div class="char-option" data-char="cow">🐮<span>Cow</span></div>
+                    </div>
+                </div>
+
+                <button id="start-btn" class="btn pixel-btn">START GAME</button>
+            </div>
+        </div>
+
+        <!-- The actual game canvas -->
+        <div id="gameplay-screen" class="screen">
+            <div class="game-header">
+                <h2>No wifi Island Run 2026</h2>
+                <div class="stats">
+                    <span id="score-display">Score: 0</span>
+                    <span id="lives-display">Lives: 2</span>
+                </div>
+            </div>
+            <canvas id="game-canvas"></canvas>
+            
+            <!-- Bottom Bar per requirements -->
+            <div class="bottom-bar">
+                <div class="player-info-card">
+                    <div id="active-char-icon" class="char-icon">🦆</div>
+                    <div class="player-details">
+                        <span class="label">Player:</span>
+                        <span id="active-player-name" class="value">Sparky</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Over overlay (used between lives or at final game over) -->
+            <div id="game-over-overlay" class="hidden glass-panel small-panel">
+                <h2 id="go-title">LIFE LOST!</h2>
+                <p id="go-message">Press Space or click to continue</p>
+                <div id="final-score-container" class="hidden">
+                    <h3>FINAL SCORE: <span id="final-score-val">0</span></h3>
+                    <button id="restart-btn" class="btn pixel-btn">PLAY AGAIN</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Need socket.io client to send score on death -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard - No wifi Island Run 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Outfit:wght@400;600;800&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/leaderboard.css">
+</head>
+<body class="leaderboard-body">
+    
+    <div class="leaderboard-container">
+        <header class="lb-header">
+            <h1 class="pixel-text glowing-text">No wifi Island Run 2026</h1>
+            <h2 class="subtitle">TOP ISLAND RUNNERS</h2>
+        </header>
+
+        <main class="lb-main glass-panel">
+            <div class="lb-table-header">
+                <div class="col-rank">RANK</div>
+                <div class="col-player">PLAYER</div>
+                <div class="col-char">CHARACTER</div>
+                <div class="col-score">SCORE</div>
+            </div>
+            
+            <div id="leaderboard-list">
+                <!-- Data populated by JS via Socket.io -->
+                <div class="lb-row empty-state">Waiting for runners...</div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Background decorative elements for premium look -->
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+    <div class="bg-shape shape-3"></div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/leaderboard.js"></script>
+</body>
+</html>

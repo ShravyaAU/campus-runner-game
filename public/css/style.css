@@ -1,0 +1,315 @@
+:root {
+    --primary-color: #fca311;
+    --bg-dark: #14213d;
+    --text-light: #ffffff;
+    --accent-red: #e63946;
+    --glass-bg: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --pixel-font: 'Bungee', cursive;
+    --modern-font: 'Outfit', sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-light);
+    font-family: var(--modern-font);
+    overflow: hidden; /* Game is fullscreen */
+}
+
+/* Typography utilities */
+.pixel-text {
+    font-family: var(--pixel-font);
+    text-transform: uppercase;
+}
+
+.glowing-text {
+    color: var(--primary-color);
+    text-shadow: 0 0 10px rgba(252, 163, 17, 0.7), 
+                 0 0 20px rgba(252, 163, 17, 0.5), 
+                 0 0 30px rgba(252, 163, 17, 0.3);
+}
+
+/* Screen Management */
+.screen {
+    display: none;
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.screen.active {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Start Screen specific */
+#start-screen {
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(circle at center, #1b263b 0%, #0d1b2a 100%);
+    gap: 3rem;
+}
+
+#start-screen h1 {
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 1rem;
+    animation: float 3s ease-in-out infinite;
+}
+
+/* Glassmorphism Panel */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 2.5rem;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.small-panel {
+    max-width: 400px;
+    text-align: center;
+}
+
+/* Input Fields */
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.input-group label {
+    font-family: var(--pixel-font);
+    font-size: 0.8rem;
+    color: #a8dadc;
+}
+
+.input-group input {
+    background: rgba(0, 0, 0, 0.2);
+    border: 2px solid var(--glass-border);
+    border-radius: 10px;
+    padding: 1rem;
+    color: white;
+    font-family: var(--modern-font);
+    font-size: 1.2rem;
+    font-weight: 700;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.input-group input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 15px rgba(252, 163, 17, 0.3);
+}
+
+/* Character Selection */
+.character-selection h3 {
+    font-family: var(--pixel-font);
+    font-size: 0.8rem;
+    color: #a8dadc;
+    margin-bottom: 1rem;
+}
+
+.character-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+    gap: 1rem;
+}
+
+.char-option {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 1rem 0.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 2rem; /* Emoji size for placeholders */
+}
+
+.char-option span {
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.char-option:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-5px);
+}
+
+.char-option.selected {
+    border-color: var(--primary-color);
+    background: rgba(252, 163, 17, 0.1);
+    box-shadow: 0 0 15px rgba(252, 163, 17, 0.3);
+}
+
+/* Buttons */
+.btn {
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: var(--pixel-font);
+    font-size: 1rem;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+}
+
+.pixel-btn {
+    background-color: var(--primary-color);
+    color: #000;
+    box-shadow: 4px 4px 0px #b17208, 0px 0px 20px rgba(252, 163, 17, 0.4);
+}
+
+.pixel-btn:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px #b17208, 0px 0px 25px rgba(252, 163, 17, 0.6);
+}
+
+.pixel-btn:active {
+    transform: translate(4px, 4px);
+    box-shadow: none;
+}
+
+/* Gameplay Screen */
+#gameplay-screen {
+    position: relative;
+    background: #e0fbfc; /* Light sky color like the screenshot */
+}
+
+.game-header {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    padding: 1.5rem 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 10;
+}
+
+.game-header h2 {
+    font-family: var(--pixel-font);
+    font-size: 1.2rem;
+    color: #000; /* Dark for visibility on light bg */
+}
+
+.stats {
+    font-family: var(--pixel-font);
+    font-size: 1.2rem;
+    color: #000;
+    display: flex;
+    gap: 2rem;
+}
+
+canvas#game-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    image-rendering: pixelated; /* Prevent blur */
+}
+
+/* Bottom Bar */
+.bottom-bar {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    z-index: 10;
+}
+
+.player-info-card {
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    border-radius: 12px;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.char-icon {
+    font-size: 2.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.player-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.player-details .label {
+    font-size: 0.8rem;
+    color: #a8dadc;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.player-details .value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+}
+
+/* Game Over Overlay */
+#game-over-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 20;
+}
+
+#game-over-overlay h2 {
+    font-family: var(--pixel-font);
+    color: var(--accent-red);
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+#final-score-val {
+    color: var(--primary-color);
+    font-size: 2.5rem;
+    text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; /* Added dark stroke for extra contrast */
+}
+
+#final-score-container h3 {
+    color: #14213d; /* Dark navy text for high contrast against light background */
+    font-size: 1.5rem;
+    font-family: var(--pixel-font);
+    margin-bottom: 1.5rem;
+}
+
+.hidden {
+    display: none !important;
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
