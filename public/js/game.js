@@ -45,6 +45,7 @@ let frames = 0;
 // Entities
 let player;
 let obstacles = [];
+let particles = [];
 let groundY = 0;
 
 let bgImage = new Image();
@@ -146,17 +147,49 @@ window.addEventListener('resize', resizeCanvas);
 
 
 // Physics and Classes
+class Particle {
+    constructor(x, y, emoji, speedX, speedY, life) {
+        this.x = x;
+        this.y = y;
+        this.emoji = emoji;
+        this.speedX = speedX;
+        this.speedY = speedY;
+        this.life = life;
+        this.maxLife = life;
+        this.size = Math.random() * 20 + 10;
+        this.rot = Math.random() * Math.PI * 2;
+        this.rotSpeed = (Math.random() - 0.5) * 0.2;
+    }
+    update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        this.life--;
+        this.rot += this.rotSpeed;
+    }
+    draw() {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, this.life / this.maxLife);
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rot);
+        ctx.font = `${this.size}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(this.emoji, 0, 0);
+        ctx.restore();
+    }
+}
+
 class Player {
     constructor() {
-        this.width = 60;
-        this.originalHeight = 60;
-        this.duckHeight = 35;
+        this.width = 140;
+        this.originalHeight = 140;
+        this.duckHeight = 85;
         this.height = this.originalHeight;
         this.x = 100;
         this.y = groundY - this.height;
         this.vy = 0;
-        this.gravity = 0.6;
-        this.jumpPower = -12;
+        this.gravity = 0.8;
+        this.jumpPower = -20;
         this.isGrounded = false;
         this.isDucking = false;
         this.charEmoji = charMap[playerSettings.character];
@@ -172,6 +205,9 @@ class Player {
         if (this.isGrounded && !this.isDucking) {
             this.vy = this.jumpPower;
             this.isGrounded = false;
+            for(let i=0; i<5; i++) {
+                particles.push(new Particle(this.x + this.width/2, this.y + this.height, '💨', (Math.random()-0.5)*5, Math.random()*-2, 20));
+            }
         }
     }
 
@@ -228,7 +264,7 @@ class Player {
         }
         
         // Draw emoji as character
-        ctx.font = `${this.originalHeight * 0.8}px Arial`;
+        ctx.font = `${this.originalHeight * 0.85}px Arial`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(this.charEmoji, 0, 0);
@@ -239,32 +275,75 @@ class Player {
 
 class Obstacle {
     constructor(type) {
-        this.type = type; // 0 = small cactus, 1 = large cactus, 2 = bird
+        this.type = type; 
         this.x = canvasWidth;
+        this.isCoin = false;
         
-        if (this.type === 2) { // Bird
-            this.width = 40;
-            this.height = 30;
-            this.y = groundY - 80 - Math.random() * 40; // High up
-            this.emoji = '🦅';
-        } else {
-            // Cactus
-            this.width = this.type === 1 ? 50 : 30;
-            this.height = this.type === 1 ? 70 : 50;
-            this.y = groundY - this.height;
-            this.emoji = '🌵';
+        switch(type) {
+            case 0: // Small Cactus
+                this.width = 65;
+                this.height = 110;
+                this.y = groundY - this.height;
+                this.emoji = '🌵';
+                break;
+            case 1: // Large Cactus
+                this.width = 85;
+                this.height = 145;
+                this.y = groundY - this.height;
+                this.emoji = '🌵';
+                break;
+            case 2: // High Bird (Must not jump)
+                this.width = 80;
+                this.height = 65;
+                this.y = groundY - 210; 
+                this.emoji = '🦅';
+                break;
+            case 3: // Low Bird (Must duck)
+                this.width = 80;
+                this.height = 65;
+                this.y = groundY - 130; 
+                this.emoji = '🦅';
+                break;
+            case 4: // Low Rock (Must jump)
+                this.width = 80;
+                this.height = 65;
+                this.y = groundY - this.height;
+                this.emoji = '🪨';
+                break;
+            case 5: // High Rock (Must duck)
+                this.width = 90;
+                this.height = 75;
+                this.y = groundY - 210;
+                this.emoji = '🪨';
+                break;
+            case 6: // Coin (Bonus)
+                this.width = 80;
+                this.height = 80;
+                this.y = groundY - 150 - Math.random() * 100;
+                this.emoji = '🪙';
+                this.isCoin = true;
+                break;
         }
     }
 
     update() {
-        this.x -= gameSpeed;
+        // Birds and coins fly slightly faster than ground obstacles
+        if (this.type === 2 || this.type === 3 || this.type === 6) {
+            this.x -= (gameSpeed * 1.2);
+        } else {
+            this.x -= gameSpeed;
+        }
+
+        if (this.isCoin) {
+            this.y += Math.sin(frames * 0.1) * 2;
+        }
     }
 
     draw() {
         ctx.save();
         ctx.translate(this.x + this.width/2, this.y + this.height/2);
         
-        ctx.font = `${this.height * 0.8}px Arial`;
+        ctx.font = `${this.height * 0.85}px Arial`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(this.emoji, 0, 0);
@@ -316,6 +395,7 @@ function initGame() {
 function resetLevel() {
     player = new Player();
     obstacles = [];
+    particles = [];
     gameSpeed = 6;
     frames = 0;
     gameState = 'PLAYING';
@@ -333,23 +413,64 @@ function resetLevel() {
 function spawnObstacle() {
     let type = 0;
     const rand = Math.random();
-    if (rand > 0.85 && score > 200) type = 2; // Bird after 200 score
-    else if (rand > 0.5) type = 1; // Big cactus
+    
+    // 20% chance to spawn a coin instead of an obstacle
+    if (Math.random() < 0.2) {
+        obstacles.push(new Obstacle(6));
+        return;
+    }
+    
+    if (score > 300) {
+        // All obstacles
+        if (rand > 0.8) type = 2;      // High bird
+        else if (rand > 0.6) type = 3; // Low bird
+        else if (rand > 0.4) type = 5; // High rock
+        else if (rand > 0.3) type = 1; // Big cactus
+        else if (rand > 0.15) type = 4; // Low rock
+        else type = 0;                 // Small cactus
+    } else if (score > 150) {
+        // Introduce low birds and rocks
+        if (rand > 0.7) type = 3;
+        else if (rand > 0.5) type = 5; // High rock
+        else if (rand > 0.3) type = 1;
+        else if (rand > 0.1) type = 4; // Low rock
+        else type = 0;
+    } else {
+        // Easy mode initially
+        if (rand > 0.6) type = 1;
+        else if (rand > 0.3) type = 4;
+        else type = 0;
+    }
     
     obstacles.push(new Obstacle(type));
 }
 
 function checkCollision() {
-    // Simple AABB collision with margin
-    const margin = 10;
-    for (let obs of obstacles) {
-        if (
-            player.x < obs.x + obs.width - margin &&
-            player.x + player.width - margin > obs.x &&
-            player.y < obs.y + obs.height - margin &&
-            player.y + player.height - margin > obs.y
-        ) {
-            return true;
+    const margin = 20; // Hitbox reduction for fairness due to larger size
+    for (let i = obstacles.length - 1; i >= 0; i--) {
+        let obs = obstacles[i];
+        let pL = player.x + margin;
+        let pR = player.x + player.width - margin;
+        let pT = player.y + margin;
+        let pB = player.y + player.height - margin;
+        
+        let oL = obs.x + margin;
+        let oR = obs.x + obs.width - margin;
+        let oT = obs.y + margin;
+        let oB = obs.y + obs.height - margin;
+
+        if (pL < oR && pR > oL && pT < oB && pB > oT) {
+            if (obs.isCoin) {
+                // Collect coin
+                score += 50;
+                playNote(880); // Play a high note for coin pickup
+                for(let j=0; j<10; j++) {
+                    particles.push(new Particle(obs.x + obs.width/2, obs.y + obs.height/2, '✨', (Math.random()-0.5)*10, (Math.random()-0.5)*10, 30));
+                }
+                obstacles.splice(i, 1);
+            } else {
+                return true; // Hit obstacle
+            }
         }
     }
     return false;
@@ -389,9 +510,26 @@ function updateHUD() {
 }
 
 function drawBackground() {
-    // Clear canvas
-    ctx.fillStyle = "#e0fbfc";
+    // Day/Night cycle color transition
+    let cycle = -Math.cos(frames * 0.001); // -1 to 1
+    let r = Math.floor(224 - (224 - 14) * ((cycle + 1) / 2));
+    let g = Math.floor(251 - (251 - 26) * ((cycle + 1) / 2));
+    let b = Math.floor(252 - (252 - 43) * ((cycle + 1) / 2));
+    
+    ctx.fillStyle = `rgb(${r},${g},${b})`;
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+    if (cycle > 0) {
+        ctx.fillStyle = `rgba(255,255,255,${cycle})`;
+        for(let i=0; i<20; i++) {
+            let sx = ((bgX * 0.1) + i * 12345) % canvasWidth;
+            if (sx < 0) sx += canvasWidth;
+            let sy = (i * 876) % (canvasHeight / 2);
+            ctx.beginPath();
+            ctx.arc(sx, sy, 2 + Math.sin(frames*0.05 + i), 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
 
     if (bgImage.complete && bgImage.naturalHeight > 0) {
         ctx.imageSmoothingEnabled = false;
@@ -405,12 +543,19 @@ function drawBackground() {
             bgX += scaledWidth;
         }
 
+        ctx.save();
         // Tile the background horizontally
         let currentX = bgX;
         while (currentX < canvasWidth) {
             ctx.drawImage(bgImage, currentX, 0, scaledWidth, canvasHeight);
             currentX += scaledWidth;
         }
+        
+        if (cycle > 0) {
+            ctx.fillStyle = `rgba(0, 0, 20, ${cycle * 0.6})`;
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+        }
+        ctx.restore();
     } else {
         // Fallback drawing if image not loaded
         ctx.fillStyle = "rgba(0,0,0,0.05)";
@@ -422,7 +567,7 @@ function drawBackground() {
     }
 
     // Draw Ground
-    ctx.strokeStyle = '#555';
+    ctx.strokeStyle = cycle > 0 ? '#aaa' : '#555';
     ctx.lineWidth = 4;
     ctx.beginPath();
     ctx.moveTo(0, groundY);
@@ -449,6 +594,11 @@ function gameLoop() {
 
     player.update();
     
+    // Trail particles when running
+    if (player.isGrounded && frames % 5 === 0 && gameSpeed > 0) {
+        particles.push(new Particle(player.x + 20, groundY, '💨', -gameSpeed * 0.5, Math.random() * -2, 15));
+    }
+    
     for (let i = obstacles.length - 1; i >= 0; i--) {
         obstacles[i].update();
         if (obstacles[i].x + obstacles[i].width < 0) {
@@ -467,6 +617,14 @@ function gameLoop() {
     drawBackground();
     obstacles.forEach(obs => obs.draw());
     player.draw();
+    
+    for (let i = particles.length - 1; i >= 0; i--) {
+        particles[i].update();
+        particles[i].draw();
+        if (particles[i].life <= 0) {
+            particles.splice(i, 1);
+        }
+    }
 
     animationFrameId = requestAnimationFrame(gameLoop);
 }
