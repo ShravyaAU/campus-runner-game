@@ -364,7 +364,7 @@ window.addEventListener('keydown', (e) => {
             e.preventDefault();
         }
     } else if (gameState === 'DYING') {
-        if (e.code === 'Space' || e.type === 'click') {
+        if (e.code === 'Space') {
             resetLevel();
         }
     }
@@ -379,10 +379,39 @@ window.addEventListener('keyup', (e) => {
 });
 
 // For touch/mouse users
-window.addEventListener('mousedown', () => {
-    if (gameState === 'PLAYING') player.jump();
-    if (gameState === 'DYING') resetLevel();
-});
+function handleInteractionStart(e) {
+    if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return;
+    
+    if (gameState === 'PLAYING') {
+        let y = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+        if (e.type === 'touchstart') {
+            e.preventDefault(); // Prevent scroll/zoom
+        }
+
+        if (y > window.innerHeight / 2) {
+            player.duck(true);
+        } else {
+            player.jump();
+        }
+    } else if (gameState === 'DYING') {
+        resetLevel();
+    }
+}
+
+function handleInteractionEnd(e) {
+    if (gameState === 'PLAYING') {
+        player.duck(false);
+        if (e.type === 'touchend' && e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
+            e.preventDefault();
+        }
+    }
+}
+
+window.addEventListener('mousedown', handleInteractionStart);
+window.addEventListener('touchstart', handleInteractionStart, {passive: false});
+
+window.addEventListener('mouseup', handleInteractionEnd);
+window.addEventListener('touchend', handleInteractionEnd, {passive: false});
 
 
 function initGame() {
